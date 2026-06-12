@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Task Manager</h1>
+      <p class="subtitle">Add tasks and see them update instantly.</p>
+    </header>
+
+    <section class="card">
+      <form id="taskForm" class="task-form">
+        <input
+          id="taskInput"
+          type="text"
+          placeholder="Type a task..."
+          autocomplete="off"
+          required
+        />
+        <button id="addBtn" type="submit">Add Task</button>
+      </form>
+
+      <div class="list-header">
+        <h2>Tasks</h2>
+        <div id="taskCount" class="count">0</div>
+      </div>
+
+      <ul id="taskList" class="task-list"></ul>
+    </section>
+
+    <footer class="footer">
+      <span>Powered by Go (net/http) + Fetch API</span>
+    </footer>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
+
