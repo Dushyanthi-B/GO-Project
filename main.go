@@ -11,15 +11,15 @@ import (
 )
 
 type Task struct {
-	ID        int    `json:"id"`
-	Text      string `json:"text"`
-	Completed bool   `json:"completed"`
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+	Done  bool   `json:"done"`
 }
 
 var (
-	tasks     []Task
+	tasks      []Task
 	nextTaskID = 1
-	mu        sync.Mutex
+	mu         sync.Mutex
 )
 
 func main() {
@@ -37,6 +37,9 @@ func main() {
 	apiMux := http.NewServeMux()
 	apiMux.HandleFunc("/api/tasks", getTasksHandler)
 	apiMux.HandleFunc("/api/add", addTaskHandler)
+	apiMux.HandleFunc("/api/task", getTaskHandler)
+	apiMux.HandleFunc("/api/done", toggleDoneHandler)
+	apiMux.HandleFunc("/api/delete", deleteTaskHandler)
 
 	fileServer := http.FileServer(http.Dir(staticDir))
 	// Serve static assets under "/".
@@ -81,10 +84,19 @@ func getTasksHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type addTaskRequest struct {
-	Text string `json:"text"`
+	Title string `json:"title"`
+}
+
+// Optional: accept common alternative payload keys.
+// This makes the API more tolerant to frontend/consumer variations.
+type addTaskRequestCompat struct {
+	Title string `json:"title"`
+	Task  string `json:"task"`
+	Name  string `json:"name"`
 }
 
 func addTaskHandler(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method != http.MethodPost {
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
 		return
@@ -92,25 +104,127 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	var req addTaskRequest
 	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
+	// Be tolerant to unknown fields to avoid breaking consumers.
 	if err := dec.Decode(&req); err != nil {
+		// Backward/forward compat fallback
+		var compat addTaskRequestCompat
+		_ = json.NewDecoder(r.Body).Decode(&compat)
+		if compat.Title != "" {
+			title := compat.Title
+			// continue below
+			mu.Lock()
+			task := Task{ID: nextTaskID, Title: title, Done: false}
+			nextTaskID++
+			tasks = append(tasks, task)
+			mu.Unlock()
+			writeJSON(w, http.StatusCreated, map[string]any{"task": task})
+			return
+		}
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": fmt.Sprintf("invalid json: %v", err)})
 		return
 	}
 
-	text := req.Text
-	if len(text) == 0 {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "text is required"})
+	title := req.Title
+
+	if len(title) == 0 {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "title is required"})
 		return
 	}
 
 	mu.Lock()
-	task := Task{ID: nextTaskID, Text: text, Completed: false}
+	task := Task{ID: nextTaskID, Title: title, Done: false}
 	nextTaskID++
 	tasks = append(tasks, task)
 	mu.Unlock()
 
 	writeJSON(w, http.StatusCreated, map[string]any{"task": task})
+}
+
+func getTaskHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+		return
+	}
+
+	id, ok := parseIDQuery(w, r)
+	if !ok {
+		return
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	for _, t := range tasks {
+		if t.ID == id {
+			writeJSON(w, http.StatusOK, map[string]any{"task": t})
+			return
+		}
+	}
+
+	writeJSON(w, http.StatusNotFound, map[string]string{"error": "task not found"})
+}
+
+func toggleDoneHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+		return
+	}
+
+	id, ok := parseIDQuery(w, r)
+	if !ok {
+		return
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	for i := range tasks {
+		if tasks[i].ID == id {
+			tasks[i].Done = !tasks[i].Done
+			writeJSON(w, http.StatusOK, map[string]any{"task": tasks[i]})
+			return
+		}
+	}
+
+	writeJSON(w, http.StatusNotFound, map[string]string{"error": "task not found"})
+}
+
+func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+		return
+	}
+
+	id, ok := parseIDQuery(w, r)
+	if !ok {
+		return
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	for i := range tasks {
+		if tasks[i].ID == id {
+			deleted := tasks[i]
+			tasks = append(tasks[:i], tasks[i+1:]...)
+			writeJSON(w, http.StatusOK, map[string]any{"task": deleted})
+			return
+		}
+	}
+
+	writeJSON(w, http.StatusNotFound, map[string]string{"error": "task not found"})
+}
+
+func parseIDQuery(w http.ResponseWriter, r *http.Request) (int, bool) {
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "id is required"})
+		return 0, false
+	}
+
+	var id int
+	if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		return 0, false
+	}
+	return id, true
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
@@ -122,4 +236,3 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 		log.Printf("failed to encode json: %v", err)
 	}
 }
-
