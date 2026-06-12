@@ -18,7 +18,7 @@
         <input
           id="taskInput"
           type="text"
-          placeholder="Type a task..."
+          placeholder="Type a task title..."
           autocomplete="off"
           required
         />
@@ -30,8 +30,26 @@
         <div id="taskCount" class="count">0</div>
       </div>
 
+      <div class="view-row">
+        <div class="view-left">
+          <input
+            id="viewIdInput"
+            class="view-input"
+            type="number"
+            min="1"
+            placeholder="View task by ID"
+          />
+        </div>
+        <div class="view-right">
+          <button id="viewTaskBtn" type="button">View by ID</button>
+        </div>
+      </div>
+
+      <div id="viewResult" class="view-result" role="status" aria-live="polite"></div>
+
       <ul id="taskList" class="task-list"></ul>
     </section>
+
 
     <footer class="footer">
       <span>Powered by Go (net/http) + Fetch API</span>
