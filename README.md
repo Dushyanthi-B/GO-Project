@@ -49,7 +49,7 @@ From `task-manager/`:
 go run .
 ```
 Then open:
-- Task Manager UI: `http://localhost:8001/index.html`
+- Task Manager UI: `http://localhost:8002/index.html`
 
 
 ## Notes
