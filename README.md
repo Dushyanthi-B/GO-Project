@@ -9,6 +9,22 @@ A simple task manager app with a Go (`net/http`) backend and a vanilla JavaScrip
 - View a task by ID
 - Delete tasks
 
+## Go Concepts Used
+
+- net/http for building the web server
+- http.NewServeMux for routing requests
+- HTTP handlers using http.HandleFunc
+- REST API methods (GET, POST, PUT, DELETE)
+- JSON handling using encoding/json
+- Structs for data modeling (Task struct)
+- In-memory data storage using slices ([]Task)
+- Middleware for CORS handling
+- Goroutines for background tasks
+- Channels for communication between goroutines
+- sync.Mutex for safe concurrent access
+- URL query parsing using r.URL.Query()
+- Logging using log package
+  
 ## Project Structure
 - `main.go` - Go web server + REST API endpoints + static file hosting
 - `static/index.html` - Task Manager UI
@@ -43,16 +59,13 @@ Data is stored **in-memory** (restart clears tasks).
 - **Backend:** Go (`net/http`), in-memory state, JSON
 - **Frontend:** HTML + CSS + vanilla JavaScript (Fetch API)
 
-## Run
-From `task-manager/`:
+## Live Demo
+🔗 https://go-project-production-023a.up.railway.app/
+
+## Run the Project
+From the project root directory `task-manager/`, run:
+
 ```bash
 go run .
-```
-Then open:
-- Task Manager UI: `http://localhost:8002/index.html`
-
-
-## Notes
-- The server listens on port **8002**.
-- Since storage is in-memory, tasks will be lost when the server stops.
+s.
 
