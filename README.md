@@ -49,8 +49,8 @@ From `task-manager/`:
 go run .
 ```
 Then open:
-- Task Manager UI: `http://localhost:8002/index.html`
-
+- Task Manager UI: `http://localhost:8001/index.html`
+- Home page (redirects): `http://localhost:8001/`
 
 ## Notes
 - The server listens on port **8002**.

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 type Task struct {
@@ -51,6 +52,24 @@ func main() {
 	mux.Handle("/api/", apiMux)
 	mux.Handle("/", rootMux)
 
+	// Background worker: goroutines + channel.
+	// One goroutine reads log messages from logCh and prints them.
+
+	type logEvent struct{ msg string }
+	logCh := make(chan logEvent, 32)
+	go func() {
+		for ev := range logCh {
+			log.Println(ev.msg)
+		}
+	}()
+
+	go func() {
+		for {
+			logCh <- logEvent{msg: "Background worker alive..."}
+			time.Sleep(10 * time.Second)
+		}
+	}()
+
 	addr := ":8002"
 	log.Printf("Task Manager running at http://localhost%s", addr)
 	log.Printf("Static files dir: %s", staticDir)
@@ -59,7 +78,7 @@ func main() {
 
 func withCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Same-origin normally makes this unnecessary, but it keeps it beginner-friendly.
+
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -87,7 +106,6 @@ type addTaskRequest struct {
 	Title string `json:"title"`
 }
 
-// Optional: accept common alternative payload keys.
 // This makes the API more tolerant to frontend/consumer variations.
 type addTaskRequestCompat struct {
 	Title string `json:"title"`
