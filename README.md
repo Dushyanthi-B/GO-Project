@@ -53,6 +53,6 @@ Then open:
 - Home page (redirects): `http://localhost:8001/`
 
 ## Notes
-- The server listens on port **8001**.
+- The server listens on port **8002**.
 - Since storage is in-memory, tasks will be lost when the server stops.
 
