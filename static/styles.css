@@ -117,18 +117,49 @@ button:active{ transform: translateY(1px); }
   gap: 10px;
 }
 
-.task-item{
+.task-card{
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 12px;
-  padding: 12px 12px;
+  flex-direction:column;
+  gap: 10px;
+  padding: 14px 12px;
   background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 14px;
 }
 
-.actions{
+.card-row{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.top-row{
+  justify-content: flex-start;
+}
+
+.bottom-row{
+  justify-content: space-between;
+}
+
+.card-title{
+  display:flex;
+  flex-direction:column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.card-title .main{
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta{ white-space: nowrap; }
+
+.pill{ flex: 0 0 auto; }
+
+.card-actions{
   display:flex;
   gap: 8px;
   align-items:center;
@@ -198,23 +229,7 @@ button:active{ transform: translateY(1px); }
   color: rgba(255,225,225,.95);
 }
 
-
-.task-text{
-  display:flex;
-  flex-direction:column;
-  gap: 4px;
-  min-width:0;
-}
-
-.task-text .main{
-  font-weight: 650;
-  word-break: break-word;
-}
-
-.task-text .meta{
-  color: var(--muted);
-  font-size: .85rem;
-}
+/* legacy .task-text removed; cards use .card-title */
 
 .pill{
   font-size: .8rem;
@@ -235,8 +250,48 @@ button:active{ transform: translateY(1px); }
   font-size: .9rem;
 }
 
-@media (max-width: 560px){
-  .task-form{ flex-direction:column; }
-  button{ width:100%; }
+/* Tablet */
+@media (max-width: 820px){
+  .container{ width: min(900px, 94vw); margin: 28px auto; }
+  .header h1{ font-size: 1.75rem; }
+  .task-card{ padding: 13px 10px; }
 }
+
+
+/* Mobile: optimize for very small screens */
+@media (max-width: 560px){
+  .container{ margin: 14px auto; gap: 12px; width: min(900px, 94vw); }
+  .card{ padding: 14px; }
+
+  /* Keep form readable */
+  .task-form{ display:flex; gap: 10px; }
+  #taskInput{ flex: 1; min-width: 0; }
+  #addBtn{ flex: 0 0 auto; }
+
+  /* Keep view row horizontal */
+  .view-row{ display:flex; gap: 10px; }
+  .view-left{ flex: 1; min-width: 0; }
+  .view-right{ flex: 0 0 auto; }
+
+  /* Cards stack nicely on small screens */
+  .card-row{ gap: 10px; }
+  .card-actions{ gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .action-btn{ padding: 7px 10px; font-size: .85rem; white-space: nowrap; }
+}
+
+@media (max-width: 380px){
+  .card-row{ gap: 8px; }
+  .action-btn{ padding: 6px 9px; font-size: .82rem; }
+  .pill{ font-size: .78rem; padding: 6px 9px; }
+}
+
+
+/* Extra safety: prevent vertical/odd character wrapping for task title */
+.card-title .main{
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+}
+
+
+
 

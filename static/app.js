@@ -31,10 +31,14 @@ async function fetchTasks() {
 
   for (const t of tasks) {
     const li = document.createElement('li');
-    li.className = 'task-item';
+    li.className = 'task-card';
+
+    // Row 1: title + id
+    const topRow = document.createElement('div');
+    topRow.className = 'card-row top-row';
 
     const left = document.createElement('div');
-    left.className = 'task-text';
+    left.className = 'card-title';
 
     const main = document.createElement('div');
     main.className = 'main';
@@ -47,12 +51,18 @@ async function fetchTasks() {
     left.appendChild(main);
     left.appendChild(meta);
 
+    topRow.appendChild(left);
+
+    // Row 2: status + actions
+    const bottomRow = document.createElement('div');
+    bottomRow.className = 'card-row bottom-row';
+
     const pill = document.createElement('div');
     pill.className = `pill ${t.done ? 'done' : 'pending'}`;
     pill.textContent = t.done ? 'Completed' : 'Pending';
 
     const actions = document.createElement('div');
-    actions.className = 'actions';
+    actions.className = 'card-actions';
 
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'action-btn';
@@ -75,9 +85,11 @@ async function fetchTasks() {
     actions.appendChild(toggleBtn);
     actions.appendChild(delBtn);
 
-    li.appendChild(left);
-    li.appendChild(pill);
-    li.appendChild(actions);
+    bottomRow.appendChild(pill);
+    bottomRow.appendChild(actions);
+
+    li.appendChild(topRow);
+    li.appendChild(bottomRow);
 
     taskList.appendChild(li);
   }
