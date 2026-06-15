@@ -30,7 +30,6 @@ A simple task manager app with a Go (`net/http`) backend and a vanilla JavaScrip
 - `static/index.html` - Task Manager UI
 - `static/app.js` - Frontend logic (fetch calls + DOM updates)
 - `static/styles.css` - Styling
-- `static/home.html` - Home page that redirects to the Task Manager UI
 
 ## How it works
 ### Backend (Go)
