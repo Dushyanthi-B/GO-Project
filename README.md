@@ -67,5 +67,4 @@ From the project root directory `task-manager/`, run:
 
 ```bash
 go run .
-s.
 
