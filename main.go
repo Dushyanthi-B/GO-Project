@@ -70,7 +70,7 @@ func main() {
 		}
 	}()
 
-	addr := ":8001"
+	addr := ":8002"
 	log.Printf("Task Manager running at http://localhost%s", addr)
 	log.Printf("Static files dir: %s", staticDir)
 	log.Fatal(http.ListenAndServe(addr, withCORS(mux)))
